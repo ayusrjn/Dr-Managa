@@ -65,9 +65,11 @@ const App: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
 
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY! });
+  const presetTopics = ["Photosynthesis", "Black Holes", "The Water Cycle", "Volcanoes"];
 
-  const handleGenerateManga = async () => {
-    if (!topic.trim()) {
+  const handleGenerateManga = async (topicOverride?: string) => {
+    const currentTopic = topicOverride || topic;
+    if (!currentTopic.trim()) {
       setError('Please enter a science topic.');
       return;
     }
@@ -79,7 +81,7 @@ const App: React.FC = () => {
       // Step 1: Generate the script
       setLoadingMessage('Dr. Manga is drafting the story...');
       const systemInstruction = "You are a manga writer creating a script for 'MangaScience', an educational comic for kids aged 8-12. Your task is to create a fun but scientifically accurate script. Use the recurring characters: Dr. Manga (a friendly scientist), Kiko (a curious child), and Momo (a funny floating mascot). The style should be a light-hearted, shōnen manga tone with simple words. The output must be a script with exactly 6 panels. Each panel must start with 'Panel X:' on a new line and contain 'Description:', 'Dialogue:', and optional 'SFX:' sections. The final panel must end with a mini moral or a quiz question.";
-      const scriptPrompt = `Explain the scientific concept of: ${topic}.`;
+      const scriptPrompt = `Explain the scientific concept of: ${currentTopic}.`;
 
       const scriptResponse = await ai.models.generateContent({
         model: 'gemini-2.5-flash',
@@ -216,6 +218,11 @@ Instructions:
     }
   };
 
+  const handlePresetClick = (presetTopic: string) => {
+    setTopic(presetTopic);
+    handleGenerateManga(presetTopic);
+  };
+
   return (
     <>
       <main className="app-container">
@@ -227,30 +234,44 @@ Instructions:
         </header>
 
         {mangaPanels.length === 0 && (
+          <div className="form-container">
             <form
-            className="topic-form"
-            onSubmit={(e) => {
-                e.preventDefault();
-                handleGenerateManga();
-            }}
+              className="topic-form"
+              onSubmit={(e) => {
+                  e.preventDefault();
+                  handleGenerateManga();
+              }}
             >
-            <input
-                type="text"
-                className="topic-input"
-                value={topic}
-                onChange={(e) => setTopic(e.target.value)}
-                placeholder="e.g., Photosynthesis, Gravity..."
-                aria-label="Science topic for manga"
-                disabled={isLoading}
-            />
-            <button
-                type="submit"
-                className="generate-button"
-                disabled={isLoading}
-            >
-                {isLoading ? 'Creating...' : 'Create Comic!'}
-            </button>
+              <input
+                  type="text"
+                  className="topic-input"
+                  value={topic}
+                  onChange={(e) => setTopic(e.target.value)}
+                  placeholder="e.g., Photosynthesis, Gravity..."
+                  aria-label="Science topic for manga"
+                  disabled={isLoading}
+              />
+              <button
+                  type="submit"
+                  className="generate-button"
+                  disabled={isLoading}
+              >
+                  {isLoading ? 'Creating...' : 'Create Comic!'}
+              </button>
             </form>
+            <div className="preset-topics-container">
+              {presetTopics.map((preset) => (
+                <button
+                  key={preset}
+                  className="preset-topic-button"
+                  onClick={() => handlePresetClick(preset)}
+                  disabled={isLoading}
+                >
+                  {preset}
+                </button>
+              ))}
+            </div>
+          </div>
         )}
 
         {error && <div className="error-container">{error}</div>}

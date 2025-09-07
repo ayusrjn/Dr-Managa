@@ -8,8 +8,8 @@
 MangaScience is an interactive app that transforms any science topic into a 6-panel black-and-white shōnen manga.
 Kids can learn about gravity, photosynthesis, or even the solar system through exciting panels filled with characters, dialogues, and SFX—just like in a real manga.
 
-_MangaScience is an interactive educational app that transforms any science concept into a 6-panel black-and-white shōnen manga. Each panel is generated with characters (Dr. Manga, Kiko, and Momo), dialogue, and SFX embedded directly inside the artwork, making science fun, visual, and engaging for kids.
-_
+_MangaScience is an interactive educational app that transforms any science concept into a 6-panel black-and-white shōnen manga. Each panel is generated with characters (Dr. Manga, Kiko, and Momo), dialogue, and SFX embedded directly inside the artwork, making science fun, visual, and engaging for kids._
+
 View this app in AI Studio: https://ai.studio/apps/drive/19lRv-3EUkzBdPoWdi8f0Jyuwry3EoE9n
 
 

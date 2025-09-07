@@ -90,6 +90,7 @@ body {
   border: none;
   border-radius: 50px;
   background-color: transparent;
+  color: var(--text-color);
 }
 
 .topic-input:focus {

@@ -111,9 +111,8 @@ const App: React.FC = () => {
         ---
 
         Now, generate ONLY the image for Panel ${panel.panel}.
-        - Base the illustration on its description: "${panel.description}".
-        - The image MUST include the dialogue "${panel.dialogue}" inside manga-style speech bubbles.
-        - If present, the image should also include the sound effect "${panel.sfx}" as stylized text integrated into the artwork.`;
+        - The illustration should be PURELY VISUAL, based on its description: "${panel.description}".
+        - DO NOT include any text, speech bubbles, or sound effects in the image itself. The dialogue and SFX will be added separately below the panel.`;
 
         const imageResponse = await ai.models.generateContent({
             model: 'gemini-2.5-flash-image-preview',
@@ -155,69 +154,98 @@ const App: React.FC = () => {
       setIsLoading(false);
     }
   };
+  
+  const handleReset = () => {
+      setMangaPanels([]);
+      setTopic('');
+      setError(null);
+  }
 
   return (
-    <main>
-      <div className="header-content">
-        <h1>MangaScience Adventure!</h1>
-        <p className="description">
-            Turn any science topic into a fun comic adventure! Just type a concept below and watch the magic happen.
-        </p>
-      </div>
+    <>
+      <main className="app-container">
+        <header className="app-header">
+          <h1>MangaScience</h1>
+          <p className="description">
+              Turn any science topic into a fun comic adventure! Just type a concept below and watch the magic happen.
+          </p>
+        </header>
 
-      <form
-        className="topic-form"
-        onSubmit={(e) => {
-          e.preventDefault();
-          handleGenerateManga();
-        }}
-      >
-        <input
-          type="text"
-          className="topic-input"
-          value={topic}
-          onChange={(e) => setTopic(e.target.value)}
-          placeholder="e.g., Photosynthesis, Gravity..."
-          aria-label="Science topic for manga"
-          disabled={isLoading}
-        />
-        <button
-          type="submit"
-          className="generate-button"
-          disabled={isLoading}
-        >
-          {isLoading ? 'Creating...' : 'Create Comic!'}
-        </button>
-      </form>
+        {mangaPanels.length === 0 && (
+            <form
+            className="topic-form"
+            onSubmit={(e) => {
+                e.preventDefault();
+                handleGenerateManga();
+            }}
+            >
+            <input
+                type="text"
+                className="topic-input"
+                value={topic}
+                onChange={(e) => setTopic(e.target.value)}
+                placeholder="e.g., Photosynthesis, Gravity..."
+                aria-label="Science topic for manga"
+                disabled={isLoading}
+            />
+            <button
+                type="submit"
+                className="generate-button"
+                disabled={isLoading}
+            >
+                {isLoading ? 'Creating...' : 'Create Comic!'}
+            </button>
+            </form>
+        )}
 
-      {error && <div className="error-container">{error}</div>}
+        {error && <div className="error-container">{error}</div>}
 
-      {isLoading && loadingMessage && (
-        <div className="loading-container">
-          <div className="spinner"></div>
-          <p>{loadingMessage}</p>
-        </div>
-      )}
+        {isLoading && (
+            <div className="loading-container">
+            <div className="spinner"></div>
+            <p>{loadingMessage}</p>
+            </div>
+        )}
 
-      {mangaPanels.length > 0 && (
-        <div className="comic-book" aria-live="polite">
-          {mangaPanels.map((panel) => (
-            <article key={panel.panel} className="manga-panel">
-              <div className="panel-image-container">
-                {panel.imageUrl ? (
-                  <img src={panel.imageUrl} alt={panel.description} className="panel-image" />
-                ) : (
-                  <div className="placeholder">
-                    <div className="spinner"></div>
-                    <span>Drawing...</span>
-                  </div>
+        {mangaPanels.length > 0 && (
+            <>
+            <section className="manga-grid" aria-live="polite">
+            {mangaPanels.map((panel) => (
+                <article key={panel.panel} className="manga-panel">
+                <div className="panel-image-container">
+                    {panel.imageUrl ? (
+                    <img src={panel.imageUrl} alt={panel.description} className="panel-image" />
+                    ) : (
+                    <div className="placeholder">
+                        <div className="spinner"></div>
+                        <span>Drawing...</span>
+                    </div>
+                    )}
+                </div>
+                {(panel.dialogue || panel.sfx) && (
+                    <div className="dialogue-box">
+                        {panel.dialogue && <p>{panel.dialogue}</p>}
+                        {panel.sfx && <p className="sfx">{panel.sfx}</p>}
+                    </div>
                 )}
-              </div>
-            </article>
-          ))}
-        </div>
-      )}
-    </main>
+                </article>
+            ))}
+            </section>
+            
+            {!isLoading && (
+                <div className="actions-container">
+                    <button onClick={handleReset} className="generate-button">
+                        Create Another Comic!
+                    </button>
+                </div>
+            )}
+            </>
+        )}
+      </main>
+      <footer className="app-footer">
+        <p>Made with ❤️ for science & manga fans.</p>
+      </footer>
+    </>
   );
 };
 

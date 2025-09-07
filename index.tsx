@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { GoogleGenAI, Modality } from '@google/genai';
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
 
 interface PanelScript {
   panel: number;
@@ -58,6 +60,7 @@ const App: React.FC = () => {
   const [topic, setTopic] = useState<string>('');
   const [mangaPanels, setMangaPanels] = useState<MangaPanelData[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isDownloading, setIsDownloading] = useState<boolean>(false);
   const [loadingMessage, setLoadingMessage] = useState<string>('');
   const [error, setError] = useState<string | null>(null);
 
@@ -164,6 +167,55 @@ Instructions:
       setError(null);
   }
 
+  const handleDownloadPdf = async () => {
+    setIsDownloading(true);
+    setError(null);
+
+    try {
+        const pdf = new jsPDF('p', 'mm', 'a4'); // A4 size page of PDF
+        const panelElements = document.querySelectorAll<HTMLElement>('.manga-panel');
+        const pdfWidth = pdf.internal.pageSize.getWidth();
+        const pdfHeight = pdf.internal.pageSize.getHeight();
+
+        for (let i = 0; i < panelElements.length; i++) {
+            const panel = panelElements[i];
+            const canvas = await html2canvas(panel, {
+                scale: 2, // Increase scale for better quality
+                useCORS: true,
+                backgroundColor: null,
+            });
+            const imgData = canvas.toDataURL('image/png');
+
+            // Calculate the aspect ratio to fit the image correctly in the PDF page
+            const imgProps = pdf.getImageProperties(imgData);
+            const aspectRatio = imgProps.width / imgProps.height;
+
+            let imgWidth = pdfWidth - 20; // with some margin
+            let imgHeight = imgWidth / aspectRatio;
+
+            // If the image is too tall, scale it down based on height instead
+            if (imgHeight > pdfHeight - 20) {
+                imgHeight = pdfHeight - 20;
+                imgWidth = imgHeight * aspectRatio;
+            }
+
+            const x = (pdfWidth - imgWidth) / 2;
+            const y = (pdfHeight - imgHeight) / 2;
+
+            if (i > 0) {
+                pdf.addPage();
+            }
+            pdf.addImage(imgData, 'PNG', x, y, imgWidth, imgHeight);
+        }
+        pdf.save(`mangascience-${topic.replace(/\s+/g, '-').toLowerCase() || 'comic'}.pdf`);
+    } catch (err) {
+        console.error("Failed to create PDF:", err);
+        setError("Sorry, there was an issue creating the PDF. Please try again.");
+    } finally {
+        setIsDownloading(false);
+    }
+  };
+
   return (
     <>
       <main className="app-container">
@@ -231,6 +283,9 @@ Instructions:
             
             {!isLoading && (
                 <div className="actions-container">
+                    <button onClick={handleDownloadPdf} className="download-button" disabled={isDownloading}>
+                        {isDownloading ? 'Downloading...' : 'Download as PDF'}
+                    </button>
                     <button onClick={handleReset} className="generate-button">
                         Create Another Comic!
                     </button>

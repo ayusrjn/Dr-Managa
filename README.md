@@ -7,6 +7,8 @@
 This contains everything you need to run your app locally.
 
 View this app in AI Studio: https://ai.studio/apps/drive/19lRv-3EUkzBdPoWdi8f0Jyuwry3EoE9n
+<img width="1004" height="590" alt="1" src="https://github.com/user-attachments/assets/c2c76943-70c0-4c69-8166-a2e245c152d4" />
+
 
 ## Run Locally
 

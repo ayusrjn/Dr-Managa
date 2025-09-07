@@ -97,22 +97,25 @@ const App: React.FC = () => {
       setMangaPanels(initialPanels);
 
       // Step 2: Generate images for each panel
-      const fullScriptText = scriptData.map(p => `Panel ${p.panel}:\nDescription: ${p.description}\nDialogue: ${p.dialogue}\nSFX: ${p.sfx || 'None'}`).join('\n\n');
-
       for (let i = 0; i < scriptData.length; i++) {
         setLoadingMessage(`Inking panel ${i + 1} of ${scriptData.length}...`);
         const panel = scriptData[i];
         
-        const imagePrompt = `You are a manga artist generating Panel ${panel.panel} of a ${scriptData.length}-panel comic. Keep character designs for Dr. Manga, Kiko, and Momo consistent across panels. Style: black & white shōnen manga, clean line art, high contrast.
-        
-        Full script for context:
-        ---
-        ${fullScriptText}
-        ---
+        const imagePrompt = `You are generating educational manga panels in black-and-white shōnen manga style. Your task is to generate Panel ${panel.panel} of a ${scriptData.length}-panel comic.
 
-        Now, generate ONLY the image for Panel ${panel.panel}.
-        - The illustration should be PURELY VISUAL, based on its description: "${panel.description}".
-        - DO NOT include any text, speech bubbles, or sound effects in the image itself. The dialogue and SFX will be added separately below the panel.`;
+Characters to include: Dr. Manga (wise scientist), Kiko (curious child), and Momo (funny mascot). Keep their designs consistent.
+
+For this specific panel (Panel ${panel.panel}):
+- Scene Description: ${panel.description}
+- Dialogue to include: "${panel.dialogue}"
+- Sound Effect (SFX) to include: ${panel.sfx ? `"${panel.sfx}"` : 'None'}
+
+Instructions:
+- Draw the scene based on the description.
+- Integrate all dialogue and SFX directly inside the manga panel as proper speech bubbles, thought bubbles, or text effects.
+- The picture must look like a finished manga panel where the characters are speaking inside the artwork.
+- Do not output dialogue or SFX as plain text outside the image.
+- Keep the art clean, high-contrast, and easy to read for kids.`;
 
         const imageResponse = await ai.models.generateContent({
             model: 'gemini-2.5-flash-image-preview',
@@ -222,12 +225,6 @@ const App: React.FC = () => {
                     </div>
                     )}
                 </div>
-                {(panel.dialogue || panel.sfx) && (
-                    <div className="dialogue-box">
-                        {panel.dialogue && <p>{panel.dialogue}</p>}
-                        {panel.sfx && <p className="sfx">{panel.sfx}</p>}
-                    </div>
-                )}
                 </article>
             ))}
             </section>
